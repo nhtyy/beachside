@@ -1,10 +1,11 @@
-Contracts marked abstract with initializers should be inherited by a child contract that also inherits initializer
+Proxiable Contracts marked abstract should be inherited by a child contract that also inherits ```initializer.sol```
+and execute their initializers like so:
 
 ```
-    import "./tokens/ProxyERC20.sol";
-    import "./proxy/Intialize.sol"
+    import "./tokens/ProxiableERC20.sol";
+    import "./proxy/Initialize.sol"
 
-    Contract Token is ProxyERC20, Initializer {
+    Contract Token is ProxiableERC20, Initializer {
         function initialize() external initializer {
             ERC20Init();
         }
