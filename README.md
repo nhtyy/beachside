@@ -1,5 +1,5 @@
 Proxiable Contracts marked abstract should be inherited by a child contract that also inherits ```initializer.sol```
-and execute their initializers like so:
+and executes their initializers like so:
 
 ```
     import "./tokens/ProxiableERC20.sol";
