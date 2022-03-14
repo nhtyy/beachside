@@ -2,7 +2,6 @@
 pragma solidity >=0.8.10;
 
 // no 0 checks
-
 abstract contract Owner {
 
     event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
@@ -28,6 +27,8 @@ abstract contract Owner {
     }
 
     // run in derived contract
+    // _transferOwnership() can be used in place of authInit()
+    // if desired owner is not deployer
     function authInit() internal {
         _transferOwnership(msg.sender);
     }

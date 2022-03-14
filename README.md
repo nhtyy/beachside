@@ -1,4 +1,4 @@
-Proxiable Contracts marked abstract should be inherited by a child contract that also inherits ```initializer.sol```
+Proxiable Contracts marked abstract should be inherited by a child contract that also inherits ```proxy/Initialize.sol```
 and executes their initializers like so:
 
 ```
