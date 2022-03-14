@@ -1,8 +1,8 @@
-// SPDX-License-Identifier: MIt
+// SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity >=0.8.10;
 
 // no 0 checks
-// Transfers ownership to deployer
+
 abstract contract Owner {
 
     event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
@@ -12,10 +12,6 @@ abstract contract Owner {
     modifier onlyOwner() {
         require (msg.sender == owner, "Not owner");
         _;
-    }
-
-    constructor() {
-        owner = msg.sender;
     }
 
     // external function only for the actual owner
@@ -29,6 +25,11 @@ abstract contract Owner {
         address oldOwner = owner;
         owner = newOwner;
         emit OwnershipTransferred(oldOwner, newOwner);
+    }
+
+    // run in derived contract
+    function authInit() internal {
+        _transferOwnership(msg.sender);
     }
     
 }

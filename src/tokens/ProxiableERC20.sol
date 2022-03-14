@@ -3,9 +3,6 @@
 
 pragma solidity ^0.8.0;
 
-// flattened OZ contract that doesnt use context
-// removed comments, removed overrides (doesnt inherit from interface)
-// made some things public instead of private with getter , to override change visbility here
 abstract contract ProxyERC20 {
 
     event Transfer(address indexed from, address indexed to, uint256 value);
@@ -18,9 +15,11 @@ abstract contract ProxyERC20 {
     mapping(address => uint256) public balanceOf;
     mapping(address => mapping(address => uint256)) private _allowances;
     uint256 public totalSupply;
-    uint8 public constant decimals = 8;
     string public name;
     string public symbol;
+
+    // constant vars are inlined
+    uint8 public constant decimals = 18;
 
 ///======================================================================================================================================
 /// Init
