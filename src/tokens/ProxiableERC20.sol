@@ -1,154 +1,156 @@
-// SPDX-License-Identifier: MIT
-// OpenZeppelin Contracts (last updated v4.5.0) (token/ERC20/ERC20.sol)
+//SPDX-License-Identifier: MIT
+//Modified version of the Solmate ERC20 (https://github.com/Rari-Capital/solmate/blob/main/src/tokens/ERC20.sol)
+pragma solidity ^0.8.10;
 
-pragma solidity ^0.8.0;
+abstract contract ProxiableERC20 { 
+    ///===========================
+    /// ERRORS
+    ///===========================
 
-abstract contract ProxiableERC20 {
+    ///@notice Thrown if an action is performed to the zero address.
+    error ToZeroAddy();
 
-    event Transfer(address indexed from, address indexed to, uint256 value);
-    event Approval(address indexed owner, address indexed spender, uint256 value);
+    ///@notice Thrown if an action is performed from the zero address.
+    error FromZeroAddy();
 
-///======================================================================================================================================
-/// State
-///======================================================================================================================================
+    ///===========================
+    /// STATE
+    ///===========================
 
-    mapping(address => uint256) public balanceOf;
-    mapping(address => mapping(address => uint256)) private _allowances;
-    uint256 public totalSupply;
+    ///@notice Name of the token.
     string public name;
+
+    ///@notice Symbol of the token.
     string public symbol;
 
-    // constant vars are inlined
-    uint8 public constant decimals = 18;
+    ///@notice Decimals of the token.
+    ///@dev Used for display purposes, default is 18.
+    uint8 public decimals;
 
-///======================================================================================================================================
-/// Init
-///======================================================================================================================================
+    ///@notice Total supply of the token.
+    uint256 public totalSupply;
 
-    // run in the most derived contract
-    function ERC20Init(string memory _name, string memory _symbol) internal {
+    ///@notice Maps an address to a balance.
+    mapping(address => uint256) public balanceOf;
+
+    ///@notice Maps an address to the amount other address are allowed to spend from it.
+    mapping(address => mapping(address => uint256)) public allowance;
+
+    ///@notice Emitted when a transfer occurs.
+    ///@dev Also emitted when a mint or burn transaction occurs.
+    event Transfer(address indexed from, address indexed to, uint256 amount);
+
+    ///@notice Emitted when an approval occurs.
+    event Approval(address indexed owner, address indexed spender, uint256 amount);
+
+    ///===========================
+    /// INIT
+    ///===========================
+
+    ///@notice Initialize the token.
+    ///@dev Takes the place of what a non-proxiable ERC-20 may use a constructor for.
+    ///@param _name Set the name of the token.
+    ///@param _symbol Set the symbol of the token.
+    ///@param _decimals Set the decimals of the token.
+    function init(
+        string memory _name,
+        string memory _symbol,
+        uint8 _decimals
+    ) internal {
         name = _name;
         symbol = _symbol;
+        decimals = _decimals;
     }
 
-///======================================================================================================================================
-/// Public
-///======================================================================================================================================
+    ///===========================
+    /// FUNCTIONS
+    ///===========================
 
+    ///@notice Transfer the token to a provided address.
+    ///@param to Address to transfer the tokens to.
+    ///@param amount Amount to transfer.
     function transfer(address to, uint256 amount) public virtual returns (bool) {
-        address owner = msg.sender;
-        _transfer(owner, to, amount);
+        if (msg.sender == address(0)) revert FromZeroAddy();
+        if (to == address(0)) revert ToZeroAddy();
+
+        balanceOf[msg.sender] -= amount;
+
+        unchecked {
+            balanceOf[to] += amount;
+        }
+
+        emit Transfer(msg.sender, to, amount);
+
         return true;
     }
 
-    function allowance(address owner, address spender) public view virtual returns (uint256) {
-        return _allowances[owner][spender];
-    }
-
-    function approve(address spender, uint256 amount) public virtual returns (bool) {
-        address owner = msg.sender;
-        _approve(owner, spender, amount);
-        return true;
-    }
-
+    ///@notice Transfer the token from a provided address to another provided address.
+    ///@param from Address to transfer the tokens from.
+    ///@param to Address to transfer the tokens to.
+    ///@param amount Amount to transfer.
     function transferFrom(
-        address from,
-        address to,
+        address from, 
+        address to, 
         uint256 amount
     ) public virtual returns (bool) {
+        if (msg.sender == address(0)) revert FromZeroAddy();
+        if (to == address(0)) revert ToZeroAddy();
 
-        address spender = msg.sender;
-        _spendAllowance(from, spender, amount);
-        _transfer(from, to, amount);
-        return true;
+        uint256 allowed = allowance[from][msg.sender];
 
-    }
+        if (allowed != type(uint256).max) allowance[from][msg.sender] = allowed - amount;
 
-    function increaseAllowance(address spender, uint256 addedValue) public virtual returns (bool) {
-        address owner = msg.sender;
-        _approve(owner, spender, allowance(owner, spender) + addedValue);
-        return true;
-    }
+        balanceOf[from] -= amount;
 
-    function decreaseAllowance(address spender, uint256 subtractedValue) public virtual returns (bool) {
-        address owner = msg.sender;
-        uint256 currentAllowance = allowance(owner, spender);
-        require(currentAllowance >= subtractedValue, "ERC20: decreased allowance below zero");
         unchecked {
-            _approve(owner, spender, currentAllowance - subtractedValue);
+            balanceOf[to] += amount;
         }
-
-        return true;
-    }
-
-///======================================================================================================================================
-/// Internal
-///======================================================================================================================================
-
-    function _transfer(
-        address from,
-        address to,
-        uint256 amount
-    ) internal virtual {
-        require(from != address(0), "ERC20: transfer from the zero address");
-        require(to != address(0), "ERC20: transfer to the zero address");
-
-        uint256 fromBalance = balanceOf[from];
-        require(fromBalance >= amount, "ERC20: transfer amount exceeds balance");
-        unchecked {
-            balanceOf[from] = fromBalance - amount;
-        }
-        balanceOf[to] += amount;
 
         emit Transfer(from, to, amount);
+
+        return true;
     }
 
-    function _mint(address account, uint256 amount) internal virtual {
-        require(account != address(0), "ERC20: mint to the zero address");
+    ///@notice Approve an address for spending the token.
+    ///@param spender Address to approve.
+    ///@param amount Amount to approve.
+    function approve(address spender, uint256 amount) public virtual returns (bool) {
+        allowance[msg.sender][spender] = amount;
 
+        emit Approval(msg.sender, spender, amount);
+
+        return true;
+    }
+
+    ///===========================
+    /// INTERNAL
+    ///===========================
+
+    ///@notice Mint a given amount of tokens.
+    ///@param to Address to mint to.
+    ///@param amount Amount to mint. 
+    function _mint(address to, uint256 amount) internal virtual {
         totalSupply += amount;
-        balanceOf[account] += amount;
-        emit Transfer(address(0), account, amount);
-    }
-
-    function _burn(address account, uint256 amount) internal virtual {
-        require(account != address(0), "ERC20: burn from the zero address");
-
-        uint256 accountBalance = balanceOf[account];
-        require(accountBalance >= amount, "ERC20: burn amount exceeds balance");
 
         unchecked {
-            balanceOf[account] = accountBalance - amount;
+            balanceOf[to] += amount;
         }
 
-        totalSupply -= amount;
-
-        emit Transfer(account, address(0), amount);
+        emit Transfer(address(0), to, amount);
     }
 
-    function _approve(
-        address owner,
-        address spender,
-        uint256 amount
-    ) internal virtual {
-        require(owner != address(0), "ERC20: approve from the zero address");
-        require(spender != address(0), "ERC20: approve to the zero address");
+    ///@notice Burn a given amount of tokens.
+    ///@param from Address to burn from.
+    ///@param amount Amount to burn.
+    function _burn(address from, uint256 amount) internal virtual {
+        if (from == address(0)) revert FromZeroAddy();
 
-        _allowances[owner][spender] = amount;
-        emit Approval(owner, spender, amount);
-    }
+        balanceOf[from] -= amount;
 
-    function _spendAllowance(
-        address owner,
-        address spender,
-        uint256 amount
-    ) internal virtual {
-        uint256 currentAllowance = allowance(owner, spender);
-        if (currentAllowance != type(uint256).max) {
-            require(currentAllowance >= amount, "ERC20: insufficient allowance");
-            unchecked {
-                _approve(owner, spender, currentAllowance - amount);
-            }
+        unchecked {
+            totalSupply -= amount;
         }
+
+        emit Transfer(from, address(0), amount);
     }
 }
