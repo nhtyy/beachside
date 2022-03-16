@@ -19,7 +19,7 @@ abstract contract Owner {
 
     ///@notice Modifier to verify that the sender is the owner of the contract.
     modifier onlyOwner() {
-        require (msg.sender == owner, "Not owner");
+        require (msg.sender == owner, "NOT_OWNER");
         _;
     }
 
