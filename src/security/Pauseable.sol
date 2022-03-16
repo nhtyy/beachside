@@ -1,44 +1,63 @@
 // SPDX-License-Identifier: MIT
-// OpenZeppelin Contracts v4.4.1 (security/Pausable.sol)
-
 pragma solidity ^0.8.0;
 
-// Adds Internal Pauseable functions, and modifiers to the child contract.
-// You must create public/external function for these internal functions
-// and add the modifiers
+/// @title Beachside Pausable
+/// @notice Pause and unpause an inherited contract.
+/// @dev You must create public/external functions for these internal functions
+/// and add the modifiers.
 abstract contract Pausable {
 
+    ///===========================
+    /// STATE
+    ///===========================
+
+    ///@notice Thrown if the contract is paused.
+    error IsPaused();
+
+    ///@notice Thrown if the contract is not paused.
+    error NotPaused();
+
+    ///@notice Emitted when the contract is paused.
     event Paused(address account);
+
+    ///@notice Emitted when the contract is unpaused.
     event Unpaused(address account);
 
-    // bools default to false, therefore no constructor/init needed
-    bool public paused;
+    ///@notice Determines whether the contract is currently paused.
+    ///@dev When the variable is at 0, it is not paused. When it is anything above 0, it is.
+    uint256 public paused;
 
-///======================================================================================================================================
-/// Modifiers
-///======================================================================================================================================
+    ///===========================
+    /// MODIFIERS
+    ///===========================
 
+    ///@notice Modifier to verify the contract is not paused.
     modifier whenNotPaused() {
-        require(!paused, "Pausable: paused");
+        if (paused != 0) revert IsPaused();
         _;
     }
 
+    ///@notice Modifier to verify the contract is paused.
     modifier whenPaused() {
-        require(paused, "Pausable: not paused");
+        if (paused == 0) revert NotPaused();
         _;
     }
 
-///======================================================================================================================================
-/// Internal
-///======================================================================================================================================
+    ///===========================
+    /// INTERNAL
+    ///===========================
 
+    ///@notice Pause.
     function _pause() internal whenNotPaused {
-        paused = true;
+        paused = 1;
+
         emit Paused(msg.sender);
     }
 
+    ///@notice Unpause.
     function _unpause() internal whenPaused {
-        paused = false;
+        paused = 0;
+
         emit Unpaused(msg.sender);
     }
     
