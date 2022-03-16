@@ -6,9 +6,8 @@ pragma solidity ^0.8.0;
 /// @dev You must create public/external functions for these internal functions
 /// and add the modifiers.
 abstract contract Pausable {
-
     ///===========================
-    /// STATE
+    /// ERRORS
     ///===========================
 
     ///@notice Thrown if the contract is paused.
@@ -16,6 +15,10 @@ abstract contract Pausable {
 
     ///@notice Thrown if the contract is not paused.
     error NotPaused();
+
+    ///===========================
+    /// STATE
+    ///===========================
 
     ///@notice Emitted when the contract is paused.
     event Paused(address account);

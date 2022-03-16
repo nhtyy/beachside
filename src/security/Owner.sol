@@ -5,6 +5,10 @@ pragma solidity >=0.8.10;
 /// @notice Transferrable owner authorization pattern.
 abstract contract Owner {
 
+    ///===========================
+    /// STATE
+    ///===========================
+
     /// @notice Emitted when the ownership is changed
     /// @param previousOwner Previous owner of the contract.
     /// @param newOwner New owner of the contract.
@@ -19,16 +23,28 @@ abstract contract Owner {
         _;
     }
 
+    ///===========================
+    /// INIT
+    ///===========================
+
     ///@notice Initially set the owner as the contract deployer.
     constructor() {
         owner = msg.sender;
     }
+
+    ///===========================
+    /// FUNCTIONS
+    ///===========================
 
     /// @notice Transfer the ownership of the contract.
     /// @param newOwner Address ownership is to be transferred to.
     function transferOwnership(address newOwner) public virtual onlyOwner {
         _transferOwnership(newOwner);
     }
+
+    ///===========================
+    /// INTERNAL
+    ///===========================
 
     /// @notice Transfer the ownership of the contract.
     /// @param newOwner Address ownership is to be transferred to.
