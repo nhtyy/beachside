@@ -13,6 +13,13 @@ abstract contract Owner {
         _;
     }
 
+    // run in derived contract
+    // _transferOwnership() can be used in place of authInit()
+    // if desired owner is not deployer
+    function authInit() internal {
+        _transferOwnership(msg.sender);
+    }
+
     // external function only for the actual owner
     function transferOwnership(address newOwner) public virtual onlyOwner {
         _transferOwnership(newOwner);
@@ -24,13 +31,6 @@ abstract contract Owner {
         address oldOwner = owner;
         owner = newOwner;
         emit OwnershipTransferred(oldOwner, newOwner);
-    }
-
-    // run in derived contract
-    // _transferOwnership() can be used in place of authInit()
-    // if desired owner is not deployer
-    function authInit() internal {
-        _transferOwnership(msg.sender);
     }
     
 }

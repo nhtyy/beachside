@@ -1,30 +1,37 @@
-// SPDX-License-Identifier: MIt
+// SPDX-License-Identifier: MIT
 pragma solidity >=0.8.10;
 
-// no 0 checks
-// Transfers ownership to deployer
+/// @title Owner
+/// @notice Transferrable owner authorization pattern.
 abstract contract Owner {
 
+    /// @notice Emitted when the ownership is changed
+    /// @param previousOwner Previous owner of the contract.
+    /// @param newOwner New owner of the contract.
     event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
 
+    /// @notice Current owner of the contract.
     address public owner;
 
+    ///@notice Modifier to verify that the sender is the owner of the contract.
     modifier onlyOwner() {
         require (msg.sender == owner, "Not owner");
         _;
     }
 
+    ///@notice Initially set the owner as the contract deployer.
     constructor() {
         owner = msg.sender;
     }
 
-    // external function only for the actual owner
+    /// @notice Transfer the ownership of the contract.
+    /// @param newOwner Address ownership is to be transferred to.
     function transferOwnership(address newOwner) public virtual onlyOwner {
         _transferOwnership(newOwner);
     }
 
-    // internal function that actually sets owner
-    // init function will call this
+    /// @notice Transfer the ownership of the contract.
+    /// @param newOwner Address ownership is to be transferred to.
     function _transferOwnership(address newOwner) internal {
         address oldOwner = owner;
         owner = newOwner;
