@@ -13,7 +13,7 @@ abstract contract Initialize {
     ///@notice Initialize the contract and verify it has not been already.
     modifier initializer() {
 
-        require(initialized != 0, "ALREADY_INITIALIZED");
+        require(initialized == 0, "ALREADY_INITIALIZED");
 
         _;
 
